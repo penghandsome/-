@@ -1,0 +1,106 @@
+//1130344作業
+
+#include <GL/glut.h>
+
+// 定義正方形的邊長
+float square_size = 0.1f; 
+
+// 用於儲存目前正方形的位置
+float square_x = 0.0f;
+float square_y = 0.0f;
+
+int COLOR_R = 200;
+int COLOR_G = 0;
+int COLOR_B = 0;
+
+// 用於控制是否需要繪製正方形
+bool draw_square = false;
+
+
+void menu(int id) {
+    if (id == 1) {
+        exit(0); // 退出程式
+    }
+    else if (id == 2) {
+        // 更改顏色(綠色)
+        COLOR_R = 0;
+        COLOR_G = 255;
+        COLOR_B = 0;
+    }
+    else if (id == 3) {
+        // 改變正方形的大小
+        square_size *= 1.5; // 每次點擊將正方形大小增加1.5倍
+    }
+    glutPostRedisplay(); 
+}
+
+// 當鼠標按下時呼叫的函數
+void mouse_callback_function(int button, int state, int x, int y) {
+    // 將滑鼠座標轉換為OpenGL座標
+    float gl_x = (x / (float)glutGet(GLUT_WINDOW_WIDTH)) * 2 - 1;
+    float gl_y = 1 - (y / (float)glutGet(GLUT_WINDOW_HEIGHT)) * 2;
+
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        // 左鍵點擊，設置正方形位置
+        square_x = gl_x;
+        square_y = gl_y;
+        draw_square = true;
+
+        glutPostRedisplay();
+    }
+}
+
+void drawSquare(float x, float y) {
+    // 設定顏色
+    glColor3ub(COLOR_R, COLOR_G, COLOR_B);
+
+    // 繪製正方形
+    glBegin(GL_QUADS);
+    glVertex2f(x - square_size, y - square_size);
+    glVertex2f(x + square_size, y - square_size);
+    glVertex2f(x + square_size, y + square_size);
+    glVertex2f(x - square_size, y + square_size);
+    glEnd();
+}
+
+void mydisplay() {
+    glClear(GL_COLOR_BUFFER_BIT);
+
+
+    if (draw_square==true) {
+        drawSquare(square_x, square_y);
+    }
+    glutMouseFunc(mouse_callback_function);//呼叫滑鼠的函式
+    glutSwapBuffers();  // 交換緩衝區以顯示繪製的圖像
+}
+
+
+void init()
+{
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-1.0, 1.0, -1.0,1.0, -1.0,1.0);
+    glMatrixMode(GL_MODELVIEW);
+}
+
+int main(int argc, char** argv) {
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(500, 500);
+    glutCreateWindow("Square Program");
+
+    init();
+
+    // 設定顯示與滑鼠函數
+    glutDisplayFunc(mydisplay);
+   
+
+    // 建立選單
+    glutCreateMenu(menu); 
+    glutAddMenuEntry("quit", 1); // 新增退出選單項
+    glutAddMenuEntry("change square color", 2); // 更改顏色選項(目前只有做一個顏色)
+    glutAddMenuEntry("change square size", 3); // 改變大小選項(目前只能放大)
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
+    glutMainLoop();
+    return 0;
+}
